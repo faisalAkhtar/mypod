@@ -6,8 +6,8 @@ import youtube, { baseTerms } from "./service/youtube";
 class App extends Component {
 	state = {
 		inputTerm: "",
-		videos: [],
-		selectedVideo: null,
+		songs: [],
+		selectedSong: null,
 	}
 
 	handleInputChange = (event) => {
@@ -16,26 +16,24 @@ class App extends Component {
 		});
 	};
 
-	handleCommandSubmit = async (event) => {
+	handleSearchSong = async (event) => {
 		event.preventDefault()
 
-		let selectedVideo = { ...this.state.selectedVideo },
-			videos = [...this.state.videos],
+		let songs = [...this.state.songs],
 			inputTerm = this.state.inputTerm.toLowerCase()
 
 		if (inputTerm !== "") {
-			videos = await this.searchVideo(inputTerm)
-			console.log(videos)
+			songs = await this.searchSong(inputTerm)
+			console.log(songs)
 		}
 
 		this.setState({
 			inputTerm: "",
-			videos,
-			selectedVideo,
+			songs,
 		});
 	};
 
-	searchVideo = async (inputTerm) => {
+	searchSong = async (inputTerm) => {
 		const response = await youtube.get("/search", {
 			params: {
 				...baseTerms,
@@ -48,36 +46,45 @@ class App extends Component {
 	render() {
 		const {
 			inputTerm,
-			videos,
-			// selectedVideo
+			songs,
+			// selectedSong
 		} = this.state;
 
 		return (
 			<div className="APP">
 				<div className="FORM">
-					<form onSubmit={this.handleCommandSubmit}>
+					<form onSubmit={this.handleSearchSong}>
 						<input
 							onChange={this.handleInputChange}
 							name="command-input"
 							type="text"
-							placeholder="Insert your command here"
+							placeholder="Search for a song here"
 							value={inputTerm}
 							autoFocus
 						/>
+						<input
+							placeholder="SUBMIT"
+							type="submit"
+						/>
 					</form>
 				</div>
-				<div className="VIDEOS">
+				<div className="SONGS">
 					{
-						videos.length > 0 &&
-						<div>
-							<ul>
-								{videos.map((video, index) => (
-									<li id={video.id.videoId} key={video.id.videoId}>
-										{index + 1}. {decodeURIComponent(video.snippet.title)}
-									</li>
-								))}
-							</ul>
-						</div>
+						songs.length > 0 &&
+						<table style={{ borderCollapse: 'collapse', margin: 'auto' }}>
+							<tr>
+								<th>SNo</th>
+								<th>Title</th>
+								<th>Published By</th>
+							</tr>
+							{songs.map((song, index) => (
+								<tr key={song.id.songId}>
+									<td key={song.id.songId + 'in'}>{index + 1}</td>
+									<td key={song.id.songId + 'ti'}>{unescape(song.snippet.title)}</td>
+									<td key={song.id.songId + 'ch'}>{song.snippet.channelTitle}</td>
+								</tr>
+							))}
+						</table>
 					}
 				</div>
 			</div>

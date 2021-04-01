@@ -3,7 +3,7 @@ const KEY = process.env.REACT_APP_API_KEY_YOUTUBE;
 
 export const baseTerms = {
 	part: "snippet",
-	maxResults: 10,
+	maxResults: 5,
 	key: KEY,
 };
 
