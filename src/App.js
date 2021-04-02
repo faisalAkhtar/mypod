@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import './App.css';
 
-import VideoEventHandler from "./component/VideoEventHandler"
+import SongEventHandler from "./component/SongEventHandler"
 
 import youtube, { baseTerms } from "./service/youtube";
 
@@ -10,19 +10,19 @@ class App extends Component {
 		inputTerm: "",
 		songs: [],
 		selectedSong: null,
-		videoEvent: null,
-		videoPauseTime: 0,
+		songEvent: null,
+		songPauseTime: 0,
 	}
 
-	handleVideoEvent = (c) => {
+	handleSongEvent = (c) => {
 		this.setState({
-			videoEvent: c
+			songEvent: c
 		})
 	}
 
-	handleVideoCommands = async (event) => {
-		event.preventDefault()
-	}
+	// handleSongCommands = async (event) => {
+	// 	event.preventDefault()
+	// }
 
 	handleInputChange = (event) => {
 		this.setState({
@@ -38,7 +38,6 @@ class App extends Component {
 
 		if (inputTerm !== "") {
 			songs = await this.searchSong(inputTerm)
-			console.log(songs)
 		}
 
 		this.setState({
@@ -58,67 +57,57 @@ class App extends Component {
 	}
 
 	setVolume = (volume) => {
-		const { videoEvent } = this.state;
-		if (videoEvent != null) {
-			videoEvent.target.setVolume(volume)
+		const { songEvent } = this.state;
+		if (songEvent != null) {
+			songEvent.target.setVolume(volume)
 			this.setState({
-				videoPauseTime: videoEvent.target.getDuration()
+				songPauseTime: songEvent.target.getDuration()
 			})
 		}
 	}
 
-	pauseVideo = () => {
-		const { videoEvent } = this.state;
-		if (videoEvent != null) {
-			videoEvent.target.pauseVideo()
+	pauseSong = () => {
+		const { songEvent } = this.state;
+		if (songEvent != null) {
+			songEvent.target.pauseVideo()
 			this.setState({
-				videoPauseTime: videoEvent.target.getDuration()
+				songPauseTime: songEvent.target.getDuration()
 			})
 		}
 	}
 
-	resumeVideo = () => {
-		const { videoEvent } = this.state;
-		if (videoEvent != null) {
-			videoEvent.target.stopVideo()
+	resumeSong = () => {
+		const { songEvent } = this.state;
+		if (songEvent != null) {
+			songEvent.target.playVideo()
 			return true
 		}
 		return false
 	}
 
-	stopVideo() {
-		const { videoEvent } = this.state
-		if (videoEvent != null) {
-			videoEvent.target.stopVideo()
+	stopSong() {
+		const { songEvent } = this.state
+		if (songEvent != null) {
+			songEvent.target.stopVideo()
 			return true
 		}
 		return false
 	}
 
-	playVideo = (index) => {
-		console.log(index)
-
+	playSong = (index) => {
 		let selectedSong = { ...this.state.selectedSong };
 		let songs = [...this.state.songs];
-		const videoEvent = this.state.videoEvent;
+		const songEvent = this.state.songEvent;
 
 		selectedSong = { ...songs[index] }
-		if (videoEvent != null) {
-			videoEvent.target.loadVideoById(selectedSong.id.videoId)
+		if (songEvent != null) {
+			songEvent.target.loadVideoById(selectedSong.id.videoId)
 		}
 
 		this.setState({
 			selectedSong,
 			songs,
 		});
-
-		let _ = this
-		setTimeout(function () {
-			console.log("{ ...this.state.selectedSong }")
-			console.log({ ..._.state.selectedSong })
-			console.log("this.state.videoEvent")
-			console.log(_.state.videoEvent)
-		}, 3000);
 	}
 
 	render() {
@@ -157,36 +146,39 @@ class App extends Component {
 						/>
 					</form>
 				</div>
-				<div className="PLAYER">
-					<div className="Player">
-						<div className="Background"></div>
-						<div className="Header">
-							<div className="Title">Now Playing</div>
-						</div>
-						<div className="Artwork">
-							<img src={imageURl} alt={title} />
-						</div>
-						<div className="TrackInformation">
-							<div className="Name"></div>
-							<div className="Artist">{title}</div>
-						</div>
-						<div className="Scrubber">
-							<div className="Scrubber-Progress"></div>
-						</div>
-						<div className="Controls">
-							<div className="Button">
-								<i className="fa fa-fw fa-play"></i>
+				{
+					selectedSong &&
+					<div className="PLAYER">
+						<div className="Player">
+							<div className="Background"></div>
+							<div className="Header">
+								<div className="Title">Now Playing</div>
 							</div>
+							<div className="Artwork">
+								<img src={imageURl} alt={title} />
+							</div>
+							<div className="TrackInformation">
+								<div className="Name"></div>
+								<div className="Artist">{title}</div>
+							</div>
+							<div className="Scrubber">
+								<div className="Scrubber-Progress"></div>
+							</div>
+							<div className="Controls">
+								<div className="Button">
+									<i className="fa fa-fw fa-play"></i>
+								</div>
+							</div>
+							<div className="Timestamps">
+								<div className="Time Time--current">{publishedDate}</div>
+								<div className="Time Time--total">{channelTitle}</div>
+							</div>
+							{selectedSong != null && (
+								<SongEventHandler song={selectedSong} onSongEvent={(c) => this.handleSongEvent(c)} />
+							)}
 						</div>
-						<div className="Timestamps">
-							<div className="Time Time--current">{publishedDate}</div>
-							<div className="Time Time--total">{channelTitle}</div>
-						</div>
-						{selectedSong != null && (
-							<VideoEventHandler video={selectedSong} onVideoEvent={(c) => this.handleVideoEvent(c)} />
-						)}
 					</div>
-				</div>
+				}
 				<div className="SONGS">
 					{
 						songs.length > 0 &&
@@ -197,7 +189,7 @@ class App extends Component {
 								<th>Published By</th>
 							</tr>
 							{songs.map((song, index) => (
-								<tr key={song.id.songId} onClick={this.playVideo.bind(this, index)}>
+								<tr key={song.id.songId} onClick={this.playSong.bind(this, index)}>
 									<td>{index + 1}</td>
 									<td>{unescape(song.snippet.title)}</td>
 									<td>{song.snippet.channelTitle}</td>
