@@ -12,7 +12,8 @@ class App extends Component {
 		selectedSong: null,
 		songEvent: null,
 		playingFlag: false,
-		muteFlag: false
+		muteFlag: false,
+		volume: 100
 	}
 
 	handleSongEvent = (c) => {
@@ -44,7 +45,11 @@ class App extends Component {
 	};
 
 	handleVolume = async (event) => {
-		event.preventDefault()
+		this.setState({ volume: parseInt(event.target.value) })
+		const { songEvent } = this.state;
+		if (songEvent != null) {
+			songEvent.target.setVolume(parseInt(event.target.value))
+		}
 	}
 
 	handlePlay = async (event) => {
@@ -74,13 +79,6 @@ class App extends Component {
 			},
 		});
 		return response.data.items;
-	}
-
-	setVolume = (volume) => {
-		const { songEvent } = this.state;
-		if (songEvent != null) {
-			songEvent.target.setVolume(volume)
-		}
 	}
 
 	pauseSong = () => {
@@ -125,7 +123,8 @@ class App extends Component {
 		this.setState({
 			selectedSong,
 			songs,
-			playingFlag: true
+			playingFlag: true,
+			// volume: songEvent.target.getVolume()
 		});
 	}
 
@@ -134,7 +133,8 @@ class App extends Component {
 			inputTerm,
 			songs,
 			selectedSong,
-			playingFlag
+			playingFlag,
+			volume
 		} = this.state;
 
 		const {
@@ -182,9 +182,14 @@ class App extends Component {
 						</div>
 					}
 					<div className="CONTROLS">
-						<button onClick={this.handleVolume}>
-							VOLUME
-						</button>
+						<input
+							name="command-input"
+							type="range"
+							min="1" max="100"
+							step="5"
+							value={volume}
+							onChange={this.handleVolume}
+						/>
 						<button onClick={this.handlePlay}>
 							{playingFlag ? 'PAUSE' : 'PLAY'}
 						</button>
