@@ -134,7 +134,8 @@ class App extends Component {
 			songs,
 			selectedSong,
 			playingFlag,
-			volume
+			volume,
+			songEvent
 		} = this.state;
 
 		const {
@@ -146,59 +147,23 @@ class App extends Component {
 
 		return (
 			<div className="APP">
-				<div className="FORM">
-					<form onSubmit={this.handleSearchSong}>
-						<input
-							onChange={this.handleInputChange}
-							name="command-input"
-							type="text"
-							placeholder="Search for a song here"
-							value={inputTerm}
-							autoFocus
-						/>
-						<input
-							placeholder="SUBMIT"
-							type="submit"
-						/>
-					</form>
-				</div>
-				<div className="PLAYER">
-					{
-						selectedSong &&
-						<div className="DETAILS">
-							<div className="Header">
-								<div className="Title">Now Playing</div>
-							</div>
-							<div className="Artwork">
-								<img src={imageURl} alt={title} />
-							</div>
-							<div className="TrackInformation">
-								<div className="Name">{title}</div>
-								<div className="Artist">{channelTitle}</div>
-							</div>
-							{selectedSong != null && (
-								<SongEventHandler song={selectedSong} onSongEvent={(c) => this.handleSongEvent(c)} />
-							)}
-						</div>
-					}
-					<div className="CONTROLS">
-						<input
-							name="command-input"
-							type="range"
-							min="1" max="100"
-							step="5"
-							value={volume}
-							onChange={this.handleVolume}
-						/>
-						<button onClick={this.handlePlay}>
-							{playingFlag ? 'PAUSE' : 'PLAY'}
-						</button>
-						<button onClick={this.handleStop}>
-							STOP
-						</button>
-					</div>
-				</div>
 				<div className="SONGS">
+					<div className="FORM">
+						<form onSubmit={this.handleSearchSong}>
+							<input
+								onChange={this.handleInputChange}
+								name="command-input"
+								type="text"
+								placeholder="Search for a song here"
+								value={inputTerm}
+								autoFocus
+							/>
+							<input
+								placeholder="SUBMIT"
+								type="submit"
+							/>
+						</form>
+					</div>
 					{
 						songs.length > 0 &&
 						<table style={{ borderCollapse: 'collapse', margin: 'auto' }}>
@@ -216,6 +181,43 @@ class App extends Component {
 							))}
 						</table>
 					}
+				</div>
+				<div className="PLAYER">
+					<div className="DETAILS">
+						{
+							selectedSong &&
+							<div>
+								<div className="Header">
+									<div className="Title">Now Playing</div>
+								</div>
+								<div className="Artwork">
+									<img src={imageURl} alt={title} />
+								</div>
+								<div className="TrackInformation">
+									<div className="Name">{title}</div>
+									<div className="Artist">{channelTitle}</div>
+								</div>
+								{selectedSong != null && (
+									<SongEventHandler song={selectedSong} onSongEvent={(c) => this.handleSongEvent(c)} />
+								)}
+							</div>
+						}
+					</div>
+					<div className="CONTROLS">
+						<button disabled={songEvent == null} onClick={this.handleStop} > ⏹️ </button>
+						<button disabled={songEvent == null} onClick={this.handlePlay} >
+							{playingFlag ? '⏸️' : '▶️'}
+						</button>
+						<input
+							disabled={songEvent == null}
+							name="command-input"
+							type="range"
+							min="1" max="100"
+							step="5"
+							value={volume}
+							onChange={this.handleVolume}
+						/>
+					</div>
 				</div>
 			</div>
 		);
