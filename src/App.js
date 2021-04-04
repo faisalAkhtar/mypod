@@ -11,7 +11,8 @@ class App extends Component {
 		songs: [],
 		selectedSong: null,
 		songEvent: null,
-		songPauseTime: 0,
+		playingFlag: false,
+		muteFlag: false
 	}
 
 	handleSongEvent = (c) => {
@@ -19,10 +20,6 @@ class App extends Component {
 			songEvent: c
 		})
 	}
-
-	// handleSongCommands = async (event) => {
-	// 	event.preventDefault()
-	// }
 
 	handleInputChange = (event) => {
 		this.setState({
@@ -46,6 +43,29 @@ class App extends Component {
 		});
 	};
 
+	handleVolume = async (event) => {
+		event.preventDefault()
+	}
+
+	handlePlay = async (event) => {
+		event.preventDefault()
+		let playingFlag = this.state.playingFlag,
+			selectedSong = this.state.selectedSong
+
+		playingFlag ?
+			this.pauseSong() :
+			(this.resumeSong() ?
+				console.log(`Resuming ${selectedSong.snippet.title}`) :
+				alert("No music on the list"))
+	}
+
+	handleStop = async (event) => {
+		event.preventDefault()
+		this.stopSong() ?
+			this.setState({ selectedSong: null, songEvent: null, playingFlag: false }) :
+			alert("No music to stop")
+	}
+
 	searchSong = async (inputTerm) => {
 		const response = await youtube.get("/search", {
 			params: {
@@ -60,9 +80,6 @@ class App extends Component {
 		const { songEvent } = this.state;
 		if (songEvent != null) {
 			songEvent.target.setVolume(volume)
-			this.setState({
-				songPauseTime: songEvent.target.getDuration()
-			})
 		}
 	}
 
@@ -71,7 +88,7 @@ class App extends Component {
 		if (songEvent != null) {
 			songEvent.target.pauseVideo()
 			this.setState({
-				songPauseTime: songEvent.target.getDuration()
+				playingFlag: false
 			})
 		}
 	}
@@ -80,6 +97,7 @@ class App extends Component {
 		const { songEvent } = this.state;
 		if (songEvent != null) {
 			songEvent.target.playVideo()
+			this.setState({ playingFlag: true })
 			return true
 		}
 		return false
@@ -107,6 +125,7 @@ class App extends Component {
 		this.setState({
 			selectedSong,
 			songs,
+			playingFlag: true
 		});
 	}
 
@@ -114,19 +133,16 @@ class App extends Component {
 		const {
 			inputTerm,
 			songs,
-			selectedSong
+			selectedSong,
+			playingFlag
 		} = this.state;
 
 		const {
-			// channelId,
-			publishedAt,
 			title,
-			// description,
 			thumbnails,
 			channelTitle,
 		} = selectedSong != null ? selectedSong.snippet : {};
 		const imageURl = selectedSong != null ? thumbnails.medium.url : "";
-		const publishedDate = selectedSong != null ? publishedAt.split("T")[0] : "";
 
 		return (
 			<div className="APP">
@@ -146,11 +162,10 @@ class App extends Component {
 						/>
 					</form>
 				</div>
-				{
-					selectedSong &&
-					<div className="PLAYER">
-						<div className="Player">
-							<div className="Background"></div>
+				<div className="PLAYER">
+					{
+						selectedSong &&
+						<div className="DETAILS">
 							<div className="Header">
 								<div className="Title">Now Playing</div>
 							</div>
@@ -158,27 +173,26 @@ class App extends Component {
 								<img src={imageURl} alt={title} />
 							</div>
 							<div className="TrackInformation">
-								<div className="Name"></div>
-								<div className="Artist">{title}</div>
-							</div>
-							<div className="Scrubber">
-								<div className="Scrubber-Progress"></div>
-							</div>
-							<div className="Controls">
-								<div className="Button">
-									<i className="fa fa-fw fa-play"></i>
-								</div>
-							</div>
-							<div className="Timestamps">
-								<div className="Time Time--current">{publishedDate}</div>
-								<div className="Time Time--total">{channelTitle}</div>
+								<div className="Name">{title}</div>
+								<div className="Artist">{channelTitle}</div>
 							</div>
 							{selectedSong != null && (
 								<SongEventHandler song={selectedSong} onSongEvent={(c) => this.handleSongEvent(c)} />
 							)}
 						</div>
+					}
+					<div className="CONTROLS">
+						<button onClick={this.handleVolume}>
+							VOLUME
+						</button>
+						<button onClick={this.handlePlay}>
+							{playingFlag ? 'PAUSE' : 'PLAY'}
+						</button>
+						<button onClick={this.handleStop}>
+							STOP
+						</button>
 					</div>
-				}
+				</div>
 				<div className="SONGS">
 					{
 						songs.length > 0 &&
