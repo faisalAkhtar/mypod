@@ -11,14 +11,43 @@ class App extends Component {
 		songs: [],
 		selectedSong: null,
 		songEvent: null,
+		songState: null,
+		buffering: true,
 		playingFlag: false,
 		muteFlag: false,
-		volume: 100
+		volume: 100,
 	}
 
 	handleSongEvent = (c) => {
 		this.setState({
 			songEvent: c
+		})
+	}
+
+	handleSongState = (event) => {
+		let playerStatus = event.data,
+			{ playingFlag, buffering } = this.state
+
+		console.log(event)
+		if (playerStatus === -1) { // unstarted
+		} else if (playerStatus === 0) { // ended
+			playingFlag = false
+			buffering = true
+		} else if (playerStatus === 1) { // playing
+			playingFlag = true
+			buffering = false
+		} else if (playerStatus === 2) { // paused
+			playingFlag = false
+			buffering = false
+		} else if (playerStatus === 3) { // buffering
+			buffering = true
+		} else if (playerStatus === 5) { // video cued
+		}
+
+		this.setState({
+			songState: event,
+			playingFlag,
+			buffering
 		})
 	}
 
@@ -134,6 +163,7 @@ class App extends Component {
 			songs,
 			selectedSong,
 			playingFlag,
+			buffering,
 			volume,
 			songEvent
 		} = this.state;
@@ -166,24 +196,26 @@ class App extends Component {
 					</div>
 					{
 						songs.length > 0 &&
-						<table style={{ borderCollapse: 'collapse', margin: 'auto' }}>
-							<tr>
-								<th>SNo</th>
-								<th>Title</th>
-								<th>Published By</th>
-							</tr>
-							{songs.map((song, index) => (
-								<tr key={song.id.songId} onClick={this.playSong.bind(this, index)}>
-									<td>{index + 1}</td>
-									<td>{unescape(song.snippet.title)}</td>
-									<td>{song.snippet.channelTitle}</td>
+						<table>
+							<tbody>
+								<tr>
+									<th>SNo</th>
+									<th>Title</th>
+									<th>Published By</th>
 								</tr>
-							))}
+								{songs.map((song, index) => (
+									<tr key={index} onClick={this.playSong.bind(this, index)}>
+										<td key={index + "0"}>{index + 1}</td>
+										<td key={index + "1"}>{unescape(song.snippet.title)}</td>
+										<td key={index + "2"}>{song.snippet.channelTitle}</td>
+									</tr>
+								))}
+							</tbody>
 						</table>
 					}
 				</div>
 				<div className="PLAYER">
-					<div className="DETAILS">
+					<div className={buffering ? "DETAILS buffering" : "DETAILS"}>
 						{
 							selectedSong &&
 							<div>
@@ -198,7 +230,11 @@ class App extends Component {
 									<div className="Artist">{channelTitle}</div>
 								</div>
 								{selectedSong != null && (
-									<SongEventHandler song={selectedSong} onSongEvent={(c) => this.handleSongEvent(c)} />
+									<SongEventHandler
+										song={selectedSong}
+										onSongEvent={(c) => this.handleSongEvent(c)}
+										onSongState={(c) => this.handleSongState(c)}
+									/>
 								)}
 							</div>
 						}

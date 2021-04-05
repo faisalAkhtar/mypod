@@ -23,11 +23,14 @@ class SongEventHandler extends Component {
             videoId: id,
             events: {
                 onReady: this.onPlayerReady,
+                onStateChange: this.onPlayerStateChange,
             },
         });
     };
 
-    onPlayerStateChange = (event) => { };
+    onPlayerStateChange = (event) => {
+        this.props.onSongState(event)
+    };
 
     onPlayerReady = (event) => {
         event.target.playVideo();
