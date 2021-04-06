@@ -4,7 +4,7 @@ import './App.css';
 import SongEventHandler from "./component/SongEventHandler"
 
 import youtube, { baseTerms } from "./service/youtube";
-import initialList from "./helper/subhanallah";
+import initialList from "./helper/initialList";
 
 class App extends Component {
 	state = {
@@ -290,7 +290,7 @@ class App extends Component {
 									value={inputTerm}
 									name="command-input"
 									type="text"
-									placeholder="Search for a song here"
+									placeholder="Search for any song here"
 									autoFocus
 								/>
 								<input

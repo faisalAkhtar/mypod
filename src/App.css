@@ -83,7 +83,7 @@
 
 .volumeControls {
 	height: 40px;
-	border-bottom: 1px solid #EBEBEB;
+	border-bottom: 2px solid #E0E0E0;
 }
 
 .volumeControls .controls {
@@ -184,12 +184,16 @@ table {
 	padding: 10px;
 }
 
-th, td {
+td {
 	padding: 12px 5px;
 	max-width: calc(100% - 500px);
 	min-width: 40px;
 	color: #232029;
-	border-bottom: 2px solid #F1F1F1;
+	border-bottom: 2px solid #E0E0E0;
+}
+
+tr:last-child td {
+	border-bottom: none;
 }
 
 td:nth-child(1), td:nth-child(2) {
