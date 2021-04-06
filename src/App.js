@@ -4,18 +4,20 @@ import './App.css';
 import SongEventHandler from "./component/SongEventHandler"
 
 import youtube, { baseTerms } from "./service/youtube";
+import initialList from "./helper/subhanallah";
 
 class App extends Component {
 	state = {
 		inputTerm: "",
-		songs: [],
+		searchedFor: "",
+		songs: initialList,
 		selectedSong: null,
 		songEvent: null,
 		songState: null,
 		buffering: true,
 		playingFlag: false,
 		muteFlag: false,
-		volume: 100,
+		volume: 50,
 	}
 
 	handleSongEvent = (c) => {
@@ -61,15 +63,18 @@ class App extends Component {
 		event.preventDefault()
 
 		let songs = [...this.state.songs],
-			inputTerm = this.state.inputTerm.toLowerCase()
+			inputTerm = this.state.inputTerm.toLowerCase(),
+			searchedFor = this.state.searchedFor
 
 		if (inputTerm !== "") {
 			songs = await this.searchSong(inputTerm)
+			searchedFor = inputTerm
 		}
 
 		this.setState({
 			inputTerm: "",
 			songs,
+			searchedFor,
 		});
 	};
 
@@ -165,7 +170,8 @@ class App extends Component {
 			playingFlag,
 			buffering,
 			volume,
-			songEvent
+			songEvent,
+			searchedFor
 		} = this.state;
 
 		const {
@@ -176,59 +182,17 @@ class App extends Component {
 		const imageURl = selectedSong != null ? thumbnails.medium.url : "";
 
 		return (
-			<div className="APP">
-				<div className="SONGS">
-					<div className="FORM">
-						<form onSubmit={this.handleSearchSong}>
-							<input
-								onChange={this.handleInputChange}
-								name="command-input"
-								type="text"
-								placeholder="Search for a song here"
-								value={inputTerm}
-								autoFocus
-							/>
-							<input
-								placeholder="SUBMIT"
-								type="submit"
-							/>
-						</form>
-					</div>
-					{
-						songs.length > 0 &&
-						<table>
-							<tbody>
-								<tr>
-									<th>SNo</th>
-									<th>Title</th>
-									<th>Published By</th>
-								</tr>
-								{songs.map((song, index) => (
-									<tr key={index} onClick={this.playSong.bind(this, index)}>
-										<td key={index + "0"}>{index + 1}</td>
-										<td key={index + "1"}>{unescape(song.snippet.title)}</td>
-										<td key={index + "2"}>{song.snippet.channelTitle}</td>
-									</tr>
-								))}
-							</tbody>
-						</table>
-					}
-				</div>
-				<div className="PLAYER">
-					<div className={buffering ? "DETAILS buffering" : "DETAILS"}>
-						{
-							selectedSong &&
-							<div>
-								<div className="Header">
-									<div className="Title">Now Playing</div>
-								</div>
-								<div className="Artwork">
-									<img src={imageURl} alt={title} />
-								</div>
-								<div className="TrackInformation">
-									<div className="Name">{title}</div>
-									<div className="Artist">{channelTitle}</div>
-								</div>
+			<div>
+				<div className="player">
+					<div className="banner">
+						<div className="widthNormaliser">
+							<div
+								className={buffering ? "buffering albumCover" : "albumCover"}
+								style={{ backgroundImage: "url(" + imageURl + ")" }}>
+							</div>
+							<div className="information">
+								<div className={buffering ? "buffering title" : "title"}>{selectedSong ? title : String.fromCharCode("nbsp")}</div>
+								<div className={buffering ? "buffering publisher" : "publisher"}>{selectedSong ? "by " + channelTitle : String.fromCharCode("nbsp")}</div>
 								{selectedSong != null && (
 									<SongEventHandler
 										song={selectedSong}
@@ -236,25 +200,79 @@ class App extends Component {
 										onSongState={(c) => this.handleSongState(c)}
 									/>
 								)}
+								<div className="controls">
+									<button disabled={songEvent == null}>
+										&#x23EE;
+									</button>
+
+									<button
+										disabled={songEvent == null}
+										onClick={this.handlePlay}
+									>
+										{playingFlag ? String.fromCharCode("0x23F8") : "▶️"}
+									</button>
+
+									<button disabled={songEvent == null}>
+										&#x23ED;
+									</button>
+								</div>
 							</div>
-						}
+						</div>
 					</div>
-					<div className="CONTROLS">
-						<button disabled={songEvent == null} onClick={this.handleStop} > ⏹️ </button>
-						<button disabled={songEvent == null} onClick={this.handlePlay} >
-							{playingFlag ? '⏸️' : '▶️'}
-						</button>
-						<input
-							disabled={songEvent == null}
-							name="command-input"
-							type="range"
-							min="1" max="100"
-							step="5"
-							value={volume}
-							onChange={this.handleVolume}
-						/>
+
+					<div className="volumeControls">
+						<div className="widthNormaliser">
+							<div className="controls">
+								<button>🔈</button>
+								<input
+									disabled={songEvent == null}
+									name="command-input"
+									type="range"
+									min="1" max="100" step="5"
+									value={volume}
+									onChange={this.handleVolume}
+								/>
+								<button>🔊</button>
+							</div>
+						</div>
 					</div>
 				</div>
+
+				<div className="songsArea">
+					<div className="widthNormaliser">
+						<div className="header">
+							<div>{searchedFor === "" ? String.fromCharCode("nbsp") : "Results for: " + searchedFor}</div>
+							<form onSubmit={this.handleSearchSong}>
+								<input
+									onChange={this.handleInputChange}
+									value={inputTerm}
+									name="command-input"
+									type="text"
+									placeholder="Search for a song here"
+									autoFocus
+								/>
+								<input
+									value="Search"
+									type="submit"
+								/>
+							</form>
+						</div>
+
+						<table>
+							<tbody>
+								{songs.map((song, index) => (
+									<tr key={index} onClick={this.playSong.bind(this, index)}>
+										<td>&#x2764;</td>
+										<td>{index + 1}</td>
+										<td>{unescape(song.snippet.title)}</td>
+										<td>{song.snippet.channelTitle}</td>
+									</tr>
+								))}
+							</tbody>
+						</table>
+					</div>
+				</div>
+
 			</div>
 		);
 	}
