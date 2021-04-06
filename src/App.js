@@ -17,7 +17,7 @@ class App extends Component {
 		buffering: true,
 		playingFlag: false,
 		muteFlag: false,
-		volume: 50,
+		volume: 100,
 		currentPlaying: -1,
 	}
 
@@ -31,7 +31,6 @@ class App extends Component {
 		let playerStatus = event.data,
 			{ playingFlag, buffering, currentPlaying } = this.state
 
-		console.log(event)
 		if (playerStatus === -1) { // unstarted
 		} else if (playerStatus === 0) { // ended
 			currentPlaying = -1
