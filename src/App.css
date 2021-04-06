@@ -206,7 +206,8 @@ tr td {
 	color: inherit;
 }
 
-tr:hover td, tr.playing td {
+/* tr:hover td, */
+tr.playing td {
 	background-color: #81C301;
 	color: #FFFEFC;
 }

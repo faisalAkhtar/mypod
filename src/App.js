@@ -18,6 +18,7 @@ class App extends Component {
 		playingFlag: false,
 		muteFlag: false,
 		volume: 50,
+		currentPlaying: -1,
 	}
 
 	handleSongEvent = (c) => {
@@ -28,11 +29,12 @@ class App extends Component {
 
 	handleSongState = (event) => {
 		let playerStatus = event.data,
-			{ playingFlag, buffering } = this.state
+			{ playingFlag, buffering, currentPlaying } = this.state
 
 		console.log(event)
 		if (playerStatus === -1) { // unstarted
 		} else if (playerStatus === 0) { // ended
+			currentPlaying = -1
 			playingFlag = false
 			buffering = true
 		} else if (playerStatus === 1) { // playing
@@ -49,7 +51,8 @@ class App extends Component {
 		this.setState({
 			songState: event,
 			playingFlag,
-			buffering
+			buffering,
+			currentPlaying
 		})
 	}
 
@@ -75,6 +78,7 @@ class App extends Component {
 			inputTerm: "",
 			songs,
 			searchedFor,
+			currentPlaying: -1,
 		});
 	};
 
@@ -84,6 +88,10 @@ class App extends Component {
 		if (songEvent != null) {
 			songEvent.target.setVolume(parseInt(event.target.value))
 		}
+	}
+
+	handleMute = (vol) => {
+		this.setState({ volume: vol })
 	}
 
 	handlePlay = async (event) => {
@@ -101,7 +109,7 @@ class App extends Component {
 	handleStop = async (event) => {
 		event.preventDefault()
 		this.stopSong() ?
-			this.setState({ selectedSong: null, songEvent: null, playingFlag: false }) :
+			this.setState({ selectedSong: null, songEvent: null, playingFlag: false, currentPlaying: -1 }) :
 			alert("No music to stop")
 	}
 
@@ -144,6 +152,29 @@ class App extends Component {
 		return false
 	}
 
+	prevSong = () => {
+		let { songs, currentPlaying } = this.state
+		if (currentPlaying !== -1) {
+			currentPlaying = currentPlaying === 0 ? songs.length - 1 : currentPlaying - 1
+			this.playSong(currentPlaying)
+			this.setState({
+				currentPlaying,
+			})
+		}
+	}
+
+	nextSong = () => {
+		let { songs, currentPlaying } = this.state
+		if (currentPlaying !== -1) {
+			currentPlaying = (currentPlaying + 1) % songs.length
+			this.playSong(currentPlaying)
+			this.setState({
+				currentPlaying,
+			})
+		}
+	}
+
+
 	playSong = (index) => {
 		let selectedSong = { ...this.state.selectedSong };
 		let songs = [...this.state.songs];
@@ -158,6 +189,7 @@ class App extends Component {
 			selectedSong,
 			songs,
 			playingFlag: true,
+			currentPlaying: index,
 			// volume: songEvent.target.getVolume()
 		});
 	}
@@ -171,7 +203,8 @@ class App extends Component {
 			buffering,
 			volume,
 			songEvent,
-			searchedFor
+			searchedFor,
+			currentPlaying,
 		} = this.state;
 
 		const {
@@ -188,11 +221,11 @@ class App extends Component {
 						<div className="widthNormaliser">
 							<div
 								className={buffering ? "buffering albumCover" : "albumCover"}
-								style={{ backgroundImage: "url(" + imageURl + ")" }}>
-							</div>
+								style={{ backgroundImage: "url(" + imageURl + "), url('https://avatars.githubusercontent.com/u/41644472?v=4')" }}
+							></div>
 							<div className="information">
-								<div className={buffering ? "buffering title" : "title"}>{selectedSong ? title : String.fromCharCode("nbsp")}</div>
-								<div className={buffering ? "buffering publisher" : "publisher"}>{selectedSong ? "by " + channelTitle : String.fromCharCode("nbsp")}</div>
+								<div className={buffering ? "buffering title" : "title"}>{selectedSong ? title : "MyPod"}</div>
+								<div className={buffering ? "buffering publisher" : "publisher"}>{selectedSong ? "by " + channelTitle : "by Faisal"}</div>
 								{selectedSong != null && (
 									<SongEventHandler
 										song={selectedSong}
@@ -201,19 +234,22 @@ class App extends Component {
 									/>
 								)}
 								<div className="controls">
-									<button disabled={songEvent == null}>
-										&#x23EE;
+									<button
+										disabled={songEvent == null}
+										onClick={this.prevSong}
+									>&#x23EE;
 									</button>
 
 									<button
 										disabled={songEvent == null}
 										onClick={this.handlePlay}
-									>
-										{playingFlag ? String.fromCharCode("0x23F8") : "▶️"}
+									>{playingFlag ? String.fromCharCode("0x23F8") : "▶️"}
 									</button>
 
-									<button disabled={songEvent == null}>
-										&#x23ED;
+									<button
+										disabled={songEvent == null}
+										onClick={this.nextSong}
+									>&#x23ED;
 									</button>
 								</div>
 							</div>
@@ -223,7 +259,10 @@ class App extends Component {
 					<div className="volumeControls">
 						<div className="widthNormaliser">
 							<div className="controls">
-								<button>🔈</button>
+								<button
+									disabled={songEvent == null}
+									onClick={this.handleMute.bind(this, 0)}
+								>🔈</button>
 								<input
 									disabled={songEvent == null}
 									name="command-input"
@@ -232,7 +271,10 @@ class App extends Component {
 									value={volume}
 									onChange={this.handleVolume}
 								/>
-								<button>🔊</button>
+								<button
+									disabled={songEvent == null}
+									onClick={this.handleMute.bind(this, 100)}
+								>🔊</button>
 							</div>
 						</div>
 					</div>
@@ -261,7 +303,11 @@ class App extends Component {
 						<table>
 							<tbody>
 								{songs.map((song, index) => (
-									<tr key={index} onClick={this.playSong.bind(this, index)}>
+									<tr
+										key={index}
+										onClick={this.playSong.bind(this, index)}
+										className={`${currentPlaying === index ? "playing" : ""}`}
+									>
 										<td>&#x2764;</td>
 										<td>{index + 1}</td>
 										<td>{unescape(song.snippet.title)}</td>
