@@ -91,6 +91,10 @@ class App extends Component {
 
 	handleMute = (vol) => {
 		this.setState({ volume: vol })
+		const { songEvent } = this.state;
+		if (songEvent != null) {
+			songEvent.target.setVolume(parseInt(vol))
+		}
 	}
 
 	handlePlay = async (event) => {
@@ -307,7 +311,7 @@ class App extends Component {
 										onClick={this.playSong.bind(this, index)}
 										className={`${currentPlaying === index ? "playing" : ""}`}
 									>
-										<td>&#x2764;</td>
+										<td>&#x25B6;</td>
 										<td>{index + 1}</td>
 										<td>{unescape(song.snippet.title)}</td>
 										<td>{song.snippet.channelTitle}</td>
