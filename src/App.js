@@ -19,6 +19,7 @@ class App extends Component {
 		muteFlag: false,
 		volume: 100,
 		currentPlaying: -1,
+		menuShown : false,
 	}
 
 	handleSongEvent = (c) => {
@@ -177,6 +178,14 @@ class App extends Component {
 		}
 	}
 
+	toggleMenu = () => {
+		let { menuShown } = this.state
+		menuShown = !menuShown
+		this.setState({
+			menuShown
+		})
+	}
+
 
 	playSong = (index) => {
 		let selectedSong = { ...this.state.selectedSong };
@@ -208,6 +217,7 @@ class App extends Component {
 			songEvent,
 			searchedFor,
 			currentPlaying,
+			menuShown
 		} = this.state;
 
 		const {
@@ -219,6 +229,11 @@ class App extends Component {
 
 		return (
 			<div>
+				<div className={menuShown ? "menu shown" : "menu"} onClick={this.toggleMenu}>
+					<div></div>
+					<div></div>
+					<div></div>
+				</div>
 				<div className="player">
 					<div className="banner">
 						<div className="widthNormaliser">
@@ -283,7 +298,7 @@ class App extends Component {
 					</div>
 				</div>
 
-				<div className="songsArea">
+				<div className={menuShown ? "songsArea shown" : "songsArea"}>
 					<div className="widthNormaliser">
 						<div className="header">
 							<div>{searchedFor === "" ? String.fromCharCode("nbsp") : "Results for: " + searchedFor}</div>
