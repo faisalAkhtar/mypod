@@ -131,7 +131,7 @@ input[type=range]::-webkit-slider-thumb {
 }
 
 .songsArea {
-	padding-top: 50px;
+	padding: 30px 20px 20px 20px;
 }
 
 .header {
@@ -218,6 +218,25 @@ tr.playing td {
 
 tr:hover td {
 	cursor: pointer;
+}
+
+footer {
+	position: fixed;
+	bottom: 0;
+	width: 100%;
+	font-size: 15px;
+	line-height: 15px;
+	padding: 5px;
+	background-color: white;
+	text-align: center;
+	border-top: 2px solid #E0E0E0;
+	z-index: 1;
+}
+
+footer a {
+	color: red;
+	text-decoration: underline;
+	text-underline-position: from-font;
 }
 
 @media screen and (max-width:768px) {}

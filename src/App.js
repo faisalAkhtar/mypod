@@ -321,6 +321,8 @@ class App extends Component {
 						</table>
 					</div>
 				</div>
+				
+				<footer>Made with &#x2764; by <a target="_blank" rel="noreferrer" href="https://faisalakhtar.github.io/">Faisal</a></footer>
 
 			</div>
 		);
