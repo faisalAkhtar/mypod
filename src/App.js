@@ -19,7 +19,7 @@ class App extends Component {
 		muteFlag: false,
 		volume: 100,
 		currentPlaying: -1,
-		menuShown : false,
+		menuShown: false,
 	}
 
 	handleSongEvent = (c) => {
@@ -67,18 +67,27 @@ class App extends Component {
 
 		let songs = [...this.state.songs],
 			inputTerm = this.state.inputTerm.toLowerCase(),
-			searchedFor = this.state.searchedFor
+			{ searchedFor, currentPlaying } = this.state
 
 		if (inputTerm !== "") {
-			songs = await this.searchSong(inputTerm)
-			searchedFor = inputTerm
+			try {
+				const response = await this.searchSong(inputTerm)
+				songs = response.data.items
+				searchedFor = inputTerm
+				currentPlaying = -1
+			} catch (error) {
+				const { response } = error
+				const { request, ...errorObject } = response
+				console.log(errorObject)
+				alert(errorObject.data.error.code + " : " + errorObject.data.error.status + "\n\n" + errorObject.data.error.message)
+			}
 		}
 
 		this.setState({
 			inputTerm: "",
 			songs,
 			searchedFor,
-			currentPlaying: -1,
+			currentPlaying,
 		});
 	};
 
@@ -124,7 +133,7 @@ class App extends Component {
 				q: inputTerm,
 			},
 		});
-		return response.data.items;
+		return response;
 	}
 
 	pauseSong = () => {
@@ -202,6 +211,7 @@ class App extends Component {
 			songs,
 			playingFlag: true,
 			currentPlaying: index,
+			menuShown: false,
 			// volume: songEvent.target.getVolume()
 		});
 	}
@@ -296,6 +306,8 @@ class App extends Component {
 							</div>
 						</div>
 					</div>
+
+					<div className="smallScreenHint">Go to the menu to search for a song / listen to one of the song in my playlist</div>
 				</div>
 
 				<div className={menuShown ? "songsArea shown" : "songsArea"}>
@@ -336,7 +348,7 @@ class App extends Component {
 						</table>
 					</div>
 				</div>
-				
+
 				<footer>Made with &#x2764; by <a target="_blank" rel="noreferrer" href="https://faisalakhtar.github.io/">Faisal</a></footer>
 
 			</div>

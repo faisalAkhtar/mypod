@@ -220,8 +220,16 @@ tr:hover td {
 	cursor: pointer;
 }
 
-.menu {
+.menu, .smallScreenHint {
 	display: none;
+}
+
+.smallScreenHint {
+	margin-top: 20px;
+	padding: 0 20px;
+	text-align: center;
+	font-size: 16px;
+	color: darkcyan;
 }
 
 footer {
@@ -325,8 +333,10 @@ footer a {
 	td:nth-child(1), td:nth-child(2) {
 		display: none;
 	}
-	.menu {
+	.menu, .smallScreenHint {
 		display: block;
+	}
+	.menu {
 		position: fixed;
 		top: 10px;
 		right: 10px;
